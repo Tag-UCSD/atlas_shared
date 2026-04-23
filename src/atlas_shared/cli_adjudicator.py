@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 import subprocess
 import tempfile
-from typing import Sequence
+from typing import Any, Literal, Sequence, cast
 
 from .relevance import AdjudicationRequest, AdjudicationResult
 
@@ -43,6 +43,13 @@ ADJUDICATION_SCHEMA = {
     ],
     "additionalProperties": False,
 }
+
+
+def _parse_verdict(value: Any) -> Literal["accept", "edge_case", "reject"]:
+    verdict = str(value)
+    if verdict not in {"accept", "edge_case", "reject"}:
+        raise ValueError(f"Unsupported adjudication verdict: {verdict}")
+    return cast(Literal["accept", "edge_case", "reject"], verdict)
 
 
 def build_relevance_adjudication_prompt(request: AdjudicationRequest) -> str:
@@ -111,7 +118,7 @@ class ShellCommandAdjudicator:
             return None
         data = json.loads(proc.stdout)
         return AdjudicationResult(
-            verdict=str(data["verdict"]),
+            verdict=_parse_verdict(data["verdict"]),
             confidence=float(data["confidence"]),
             reasons=tuple(str(item) for item in data.get("reasons", [])),
             needs_manual_review=bool(data.get("needs_manual_review", False)),
@@ -182,7 +189,7 @@ class CodexCLIAdjudicator(ShellCommandAdjudicator):
                 return None
             data = json.loads(output_path.read_text())
             return AdjudicationResult(
-                verdict=str(data["verdict"]),
+                verdict=_parse_verdict(data["verdict"]),
                 confidence=float(data["confidence"]),
                 reasons=tuple(str(item) for item in data.get("reasons", [])),
                 needs_manual_review=bool(data.get("needs_manual_review", False)),
@@ -226,7 +233,7 @@ class ClaudeCLIAdjudicator(ShellCommandAdjudicator):
             return None
         data = json.loads(proc.stdout)
         return AdjudicationResult(
-            verdict=str(data["verdict"]),
+            verdict=_parse_verdict(data["verdict"]),
             confidence=float(data["confidence"]),
             reasons=tuple(str(item) for item in data.get("reasons", [])),
             needs_manual_review=bool(data.get("needs_manual_review", False)),

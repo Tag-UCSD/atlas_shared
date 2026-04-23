@@ -149,7 +149,12 @@ class PreExtractionArticleIntake:
 
     @classmethod
     def from_mapping(cls, obj: Mapping[str, Any]) -> "PreExtractionArticleIntake":
-        measurement_inventory = obj.get("measurement_inventory") if isinstance(obj.get("measurement_inventory"), Sequence) else ()
+        raw_measurement_inventory = obj.get("measurement_inventory")
+        measurement_inventory = (
+            raw_measurement_inventory
+            if isinstance(raw_measurement_inventory, Sequence) and not isinstance(raw_measurement_inventory, (str, bytes))
+            else ()
+        )
         measurement_terms: list[str] = []
         instrument_terms: list[str] = []
         sensor_terms: list[str] = []

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Iterable, Mapping, Sequence
+from typing import Any, Iterable, Literal, Mapping, Sequence
 
 from ._util import _assessment_weight
 from .relevance import (
@@ -57,7 +57,7 @@ class QuestionBundleRouter:
         classifier: SupportsArticleTypeClassification | None = None,
         adjudicator: SupportsRelevanceAdjudication | None = None,
         registry_sink: SupportsClassificationRegistry | None = None,
-        adjudication_policy: str = "borderline_only",
+        adjudication_policy: Literal["never", "borderline_only", "always"] = "borderline_only",
     ) -> None:
         self.constitutions = tuple(constitutions)
         self.registry_sink = registry_sink
