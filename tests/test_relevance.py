@@ -120,10 +120,34 @@ def test_build_article_bundle_sorts_accepts_and_edge_cases() -> None:
         ],
     )
 
-    assert bundle.bundle_id == "bundle-nature-and-attention"
+    assert bundle.bundle_id == "bundle-nature-and-attention-sq-art-001"
     assert [item.paper_id for item in bundle.accepted] == ["PDF-0001"]
     assert [item.paper_id for item in bundle.edge_cases] == ["PDF-0003"]
     assert [item.paper_id for item in bundle.rejected] == ["PDF-0002"]
+
+
+def test_bundle_id_disambiguates_constitutions_that_share_a_topic() -> None:
+    first = QuestionConstitution(
+        question_id="Q-LIGHT-ATTN",
+        question_text="Does lighting improve attention?",
+        topic="Lighting",
+    )
+    second = QuestionConstitution(
+        question_id="Q-LIGHT-MOOD",
+        question_text="Does lighting improve mood?",
+        topic="Lighting",
+    )
+
+    assert first.bundle_id == "bundle-lighting-q-light-attn"
+    assert second.bundle_id == "bundle-lighting-q-light-mood"
+    assert first.bundle_id != second.bundle_id
+
+
+def test_bundle_id_remains_stably_derived_from_topic_for_single_question() -> None:
+    constitution = _constitution()
+
+    assert constitution.bundle_id == "bundle-nature-and-attention-sq-art-001"
+    assert constitution.bundle_id.startswith("bundle-nature-and-attention")
 
 
 class _StubAdjudicator:

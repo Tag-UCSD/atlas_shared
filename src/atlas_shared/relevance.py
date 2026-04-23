@@ -174,7 +174,7 @@ class QuestionConstitution:
     @property
     def bundle_id(self) -> str:
         stem = self.topic or self.question_text or self.question_id
-        return f"bundle-{_slug(stem)}"
+        return f"bundle-{_slug(stem)}-{_slug(self.question_id)}"
 
 
 @dataclass(frozen=True)

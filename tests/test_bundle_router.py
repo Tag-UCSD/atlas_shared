@@ -74,7 +74,7 @@ def test_router_prefers_topic_with_direct_accept_over_adjacent_edge_case() -> No
     )
 
     assert result.primary_topic == "Lighting"
-    assert result.primary_bundle_id == "bundle-lighting"
+    assert result.primary_bundle_id == "bundle-lighting-q1"
     assert result.candidates[0].accepted_count == 1
 
 
@@ -143,4 +143,4 @@ def test_router_emits_single_bundle_routing_notification_per_paper() -> None:
 
     assert first.primary_topic == "Lighting"
     assert second.primary_topic == "Lighting"
-    assert sink.routings == [("PDF-1003", "Lighting", "bundle-lighting")]
+    assert sink.routings == [("PDF-1003", "Lighting", "bundle-lighting-q1")]
