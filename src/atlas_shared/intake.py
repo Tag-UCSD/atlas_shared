@@ -79,13 +79,17 @@ CLEAR_FALSE_POSITIVE_TERMS: tuple[str, ...] = (
     "particle physics",
     "quantum chromodynamics",
     "plasma turbulence",
-    "molecular dynamics",
+    "semiconductor wafer",
+    "galactic",
+)
+
+
+SOFT_FALSE_POSITIVE_TERMS: tuple[str, ...] = (
     "enzyme",
     "protein folding",
     "gene expression",
-    "semiconductor wafer",
+    "molecular dynamics",
     "astrophysics",
-    "galactic",
 )
 
 
@@ -381,7 +385,8 @@ class PreExtractionIntakeGate:
         article_type = self.filter.classify_article_type(article)
         text = intake.available_text
         domain_hits = _hits(text, DOMAIN_SIGNAL_TERMS)
-        false_positive_hits = _hits(text, CLEAR_FALSE_POSITIVE_TERMS)
+        clear_false_positive_hits = _hits(text, CLEAR_FALSE_POSITIVE_TERMS)
+        soft_false_positive_hits = _hits(text, SOFT_FALSE_POSITIVE_TERMS)
 
         if not intake.has_substantive_text:
             return self._build_result(
@@ -405,6 +410,36 @@ class PreExtractionIntakeGate:
                 confidence=0.35,
                 needs_manual_review=True,
                 reasons=("title-level metadata is present, but abstract or first-page text is needed before exclusion",),
+            )
+
+        if clear_false_positive_hits:
+            return self._build_result(
+                intake,
+                article_type,
+                decision="reject_clear_false_positive",
+                routing_target="reject",
+                domain_relevance="clear_false_positive",
+                confidence=0.92,
+                needs_manual_review=False,
+                reasons=(
+                    "clear false-positive signals are present and no Atlas domain signals were found",
+                    f"clear false-positive hits: {', '.join(clear_false_positive_hits)}",
+                ),
+            )
+
+        if soft_false_positive_hits:
+            return self._build_result(
+                intake,
+                article_type,
+                decision="manual_review",
+                routing_target="manual_review",
+                domain_relevance="adjacent_or_novel" if domain_hits else "unknown",
+                confidence=0.48,
+                needs_manual_review=True,
+                reasons=(
+                    "soft false-positive signals are present and require manual review rather than hard rejection",
+                    f"soft false-positive hits: {', '.join(soft_false_positive_hits)}",
+                ),
             )
 
         routing = self.router.route_article(article) if self.router is not None else None
@@ -501,21 +536,6 @@ class PreExtractionIntakeGate:
                 novelty_signal=0.72,
                 new_topic_candidate=True,
                 proposed_topic_label=label,
-            )
-
-        if false_positive_hits:
-            return self._build_result(
-                intake,
-                article_type,
-                decision="reject_clear_false_positive",
-                routing_target="reject",
-                domain_relevance="clear_false_positive",
-                confidence=0.92,
-                needs_manual_review=False,
-                reasons=(
-                    "clear false-positive signals are present and no Atlas domain signals were found",
-                    f"false-positive hits: {', '.join(false_positive_hits)}",
-                ),
             )
 
         return self._build_result(

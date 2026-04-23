@@ -154,3 +154,54 @@ def test_intake_keeps_false_positive_terms_when_domain_signal_exists() -> None:
     assert result.domain_relevance == "adjacent_or_novel"
     assert result.topic_expansion_candidate is True
     assert result.proposed_topic_label
+
+
+def test_intake_hard_rejects_clear_false_positive_particle_physics() -> None:
+    gate = PreExtractionIntakeGate(_constitutions())
+    result = gate.assess(
+        {
+            "paper_id": "PDF-2006",
+            "title": "Particle physics and galactic turbulence",
+            "abstract": "This paper models particle physics interactions in galactic systems.",
+        }
+    )
+
+    assert result.intake_decision == "reject_clear_false_positive"
+    assert result.routing_target == "reject"
+    assert result.needs_manual_review is False
+
+
+def test_intake_soft_false_positive_enzyme_stress_goes_to_manual_review() -> None:
+    gate = PreExtractionIntakeGate(_constitutions())
+    result = gate.assess(
+        {
+            "paper_id": "PDF-2007",
+            "title": "Cortisol enzyme markers and workplace stress",
+            "abstract": (
+                "This paper examines cortisol enzyme markers, perceived workplace stress, "
+                "and office fatigue in employees."
+            ),
+        }
+    )
+
+    assert result.intake_decision == "manual_review"
+    assert result.routing_target == "manual_review"
+    assert result.needs_manual_review is True
+    assert result.domain_relevance == "adjacent_or_novel"
+
+
+def test_intake_no_false_positive_terms_passes_without_keyword_rejection() -> None:
+    gate = PreExtractionIntakeGate(_constitutions())
+    result = gate.assess(
+        {
+            "paper_id": "PDF-2008",
+            "title": "Window access improves alertness in office work",
+            "abstract": (
+                "An experiment with 44 participants found that window access improved "
+                "alertness and reduced fatigue in workplaces (p < .05)."
+            ),
+        }
+    )
+
+    assert result.intake_decision == "accept_candidate"
+    assert result.routing_target == "article_eater"
