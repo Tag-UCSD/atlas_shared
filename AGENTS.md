@@ -20,6 +20,24 @@ Canonical contracts:
 - `contracts/PRE_EXTRACTION_INTAKE_CONTRACT_2026-04-17.md`
 - `contracts/PANEL_TOPIC_EVIDENCE_CONTRACT_2026-04-17.md`
 
+## Public API Rule
+
+The ten symbols in `atlas_shared.__all__` are the public API:
+
+- `AdaptiveClassifierSubsystem`
+- `ArticleCandidate`
+- `BundleRoutingResult`
+- `PreExtractionIntakeGate`
+- `QuestionArticleRelevanceFilter`
+- `QuestionBundleRouter`
+- `QuestionConstitution`
+- `RegistryFact`
+- `RelevanceAssessment`
+- `load_topic_constitution_bank`
+
+Anything else is internal. Consumers may import it from submodules if they
+must, but they should do so knowing those imports may break during refactor.
+
 ## Panel Evidence Rule
 
 The student-facing questions are topic constitutions. The panel dossiers in
