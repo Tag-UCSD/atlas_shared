@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from importlib import resources
+import json
 import re
 from typing import Any, Iterable, Literal, Mapping, Protocol, Sequence
 
@@ -111,6 +113,28 @@ def _normalize_classifier_output(result: Any) -> ArticleTypeDecision:
     raise TypeError("Unsupported article-type classifier output")
 
 
+def _load_article_type_defaults() -> dict[str, tuple[str, ...]]:
+    package_root = resources.files("atlas_shared")
+    text = (package_root / "data" / "article_type_defaults.json").read_text(encoding="utf-8")
+    payload = json.loads(text)
+    if not isinstance(payload, Mapping):
+        raise ValueError("article_type_defaults.json must contain a JSON object")
+    loaded: dict[str, tuple[str, ...]] = {}
+    for key in ("allowed_article_types", "marginal_article_types", "rejected_article_types"):
+        value = payload.get(key, ())
+        if isinstance(value, Sequence) and not isinstance(value, (str, bytes)):
+            loaded[key] = tuple(str(item).strip() for item in value if str(item).strip())
+        else:
+            loaded[key] = ()
+    return loaded
+
+
+_ARTICLE_TYPE_DEFAULTS = _load_article_type_defaults()
+ALLOWED_ARTICLE_TYPES_DEFAULT = _ARTICLE_TYPE_DEFAULTS["allowed_article_types"]
+MARGINAL_ARTICLE_TYPES_DEFAULT = _ARTICLE_TYPE_DEFAULTS["marginal_article_types"]
+REJECTED_ARTICLE_TYPES_DEFAULT = _ARTICLE_TYPE_DEFAULTS["rejected_article_types"]
+
+
 @dataclass(frozen=True)
 class QuestionConstitution:
     question_id: str
@@ -126,27 +150,9 @@ class QuestionConstitution:
     accept_indicators: tuple[str, ...] = ()
     reject_indicators: tuple[str, ...] = ()
     edge_case_indicators: tuple[str, ...] = ()
-    allowed_article_types: tuple[str, ...] = (
-        "empirical_research",
-        "systematic_review",
-        "meta_analysis",
-        "narrative_review",
-        "case_study",
-        "mixed_methods",
-        "qualitative_research",
-        "qualitative",
-    )
-    marginal_article_types: tuple[str, ...] = (
-        "theoretical",
-        "commentary",
-        "protocol",
-    )
-    rejected_article_types: tuple[str, ...] = (
-        "book_review",
-        "editorial",
-        "preprint",
-        "computational_simulation",
-    )
+    allowed_article_types: tuple[str, ...] = ALLOWED_ARTICLE_TYPES_DEFAULT
+    marginal_article_types: tuple[str, ...] = MARGINAL_ARTICLE_TYPES_DEFAULT
+    rejected_article_types: tuple[str, ...] = REJECTED_ARTICLE_TYPES_DEFAULT
     required_evidence_terms: tuple[str, ...] = ()
 
     @classmethod
@@ -165,9 +171,9 @@ class QuestionConstitution:
             accept_indicators=tuple(_split_terms(spec.get("accept_indicators") or spec.get("in_criteria"))),
             reject_indicators=tuple(_split_terms(spec.get("reject_indicators") or spec.get("out_criteria"))),
             edge_case_indicators=tuple(_split_terms(spec.get("edge_case_indicators") or spec.get("hard_case_criteria"))),
-            allowed_article_types=tuple(_split_terms(spec.get("allowed_article_types"))) or cls.allowed_article_types,
-            marginal_article_types=tuple(_split_terms(spec.get("marginal_article_types"))) or cls.marginal_article_types,
-            rejected_article_types=tuple(_split_terms(spec.get("rejected_article_types"))) or cls.rejected_article_types,
+            allowed_article_types=tuple(_split_terms(spec.get("allowed_article_types"))) or ALLOWED_ARTICLE_TYPES_DEFAULT,
+            marginal_article_types=tuple(_split_terms(spec.get("marginal_article_types"))) or MARGINAL_ARTICLE_TYPES_DEFAULT,
+            rejected_article_types=tuple(_split_terms(spec.get("rejected_article_types"))) or REJECTED_ARTICLE_TYPES_DEFAULT,
             required_evidence_terms=tuple(_split_terms(spec.get("required_evidence_terms"))),
         )
 

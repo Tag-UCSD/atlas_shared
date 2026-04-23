@@ -1,0 +1,23 @@
+{
+  "allowed_article_types": [
+    "empirical_research",
+    "systematic_review",
+    "meta_analysis",
+    "narrative_review",
+    "case_study",
+    "mixed_methods",
+    "qualitative_research",
+    "qualitative"
+  ],
+  "marginal_article_types": [
+    "theoretical",
+    "commentary",
+    "protocol"
+  ],
+  "rejected_article_types": [
+    "book_review",
+    "editorial",
+    "preprint",
+    "computational_simulation"
+  ]
+}

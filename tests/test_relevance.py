@@ -207,3 +207,31 @@ def test_relevance_filter_emits_registry_notifications_once_per_paper_question()
     assert second.verdict == "accept"
     assert sink.article_types == [("PDF-0099", "empirical_research")]
     assert sink.assessments == [("PDF-0099", "SQ-ART-001", "accept")]
+
+
+def test_from_panel_spec_loads_article_type_defaults_from_data_file() -> None:
+    constitution = QuestionConstitution.from_panel_spec(
+        {
+            "question_id": "Q-DEFAULTS",
+            "question_text": "Does window access improve workplace attention?",
+            "topic": "Lighting",
+        }
+    )
+
+    assert constitution.allowed_article_types == (
+        "empirical_research",
+        "systematic_review",
+        "meta_analysis",
+        "narrative_review",
+        "case_study",
+        "mixed_methods",
+        "qualitative_research",
+        "qualitative",
+    )
+    assert constitution.marginal_article_types == ("theoretical", "commentary", "protocol")
+    assert constitution.rejected_article_types == (
+        "book_review",
+        "editorial",
+        "preprint",
+        "computational_simulation",
+    )
