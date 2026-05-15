@@ -33,7 +33,7 @@ The module must support:
 - JSON round-tripping for fingerprints and nested field records.
 - SQL-row round-tripping for the `paper_quality_fingerprints` table.
 - SQL-row round-tripping for `hard_rule_violations`.
-- Pydantic validation via `PaperQualityFingerprintSchema`.
+- Pydantic validation via `QualityFingerprintEnvelope`.
 
 ## Success Conditions
 

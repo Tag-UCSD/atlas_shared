@@ -59,7 +59,7 @@ from .paper_quality import (
     FingerprintField,
     HardRuleViolation,
     PaperQualityFingerprint,
-    PaperQualityFingerprintSchema,
+    QualityFingerprintEnvelope,
     PowerRecord,
     PreregRecord,
     SampleOverlapEdge,

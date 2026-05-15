@@ -7,7 +7,7 @@ from atlas_shared.paper_quality import (
     FingerprintField,
     HardRuleViolation,
     PaperQualityFingerprint,
-    PaperQualityFingerprintSchema,
+    QualityFingerprintEnvelope,
     PowerRecord,
     PreregRecord,
     SourceExcerpt,
@@ -129,7 +129,7 @@ def test_hard_rule_violation_round_trips_through_sql_shape() -> None:
 
 
 def test_pydantic_schema_wraps_fingerprint_payload() -> None:
-    schema = PaperQualityFingerprintSchema.from_fingerprint(_fingerprint())
+    schema = QualityFingerprintEnvelope.from_fingerprint(_fingerprint())
 
     assert schema.paper_id == "PDF-0001"
     assert schema.extractor_version == "synthetic-v1"

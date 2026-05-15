@@ -323,7 +323,7 @@ class PaperQualityFingerprint:
         )
 
 
-class PaperQualityFingerprintSchema(BaseModel):
+class QualityFingerprintEnvelope(BaseModel):
     model_config = ConfigDict(frozen=True)
 
     paper_id: str
@@ -331,7 +331,7 @@ class PaperQualityFingerprintSchema(BaseModel):
     fingerprint: dict[str, Any] = Field(default_factory=dict)
 
     @classmethod
-    def from_fingerprint(cls, fingerprint: PaperQualityFingerprint) -> "PaperQualityFingerprintSchema":
+    def from_fingerprint(cls, fingerprint: PaperQualityFingerprint) -> "QualityFingerprintEnvelope":
         return cls(
             paper_id=fingerprint.paper_id,
             extractor_version=fingerprint.extractor_version,
