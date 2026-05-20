@@ -22,7 +22,14 @@ NEGATION_RE = re.compile(
 
 
 class SupportsArticleTypeClassification(Protocol):
-    def classify(self, *, abstract: str = "", title: str = "", keywords: Sequence[str] = ()) -> Any: ...
+    def classify(
+        self,
+        *,
+        abstract: str = "",
+        title: str = "",
+        keywords: Sequence[str] = (),
+        body_text: str = "",
+    ) -> Any: ...
 
 
 class SupportsRelevanceAdjudication(Protocol):
@@ -302,11 +309,19 @@ class QuestionArticleRelevanceFilter:
             )
             self._record_article_type(article, decision)
             return decision
-        raw = self.classifier.classify(
-            abstract=article.abstract or article.body_text[:3000],
-            title=article.title,
-            keywords=list(article.keywords),
-        )
+        try:
+            raw = self.classifier.classify(
+                abstract=article.abstract,
+                title=article.title,
+                keywords=list(article.keywords),
+                body_text=article.body_text,
+            )
+        except TypeError:
+            raw = self.classifier.classify(
+                abstract=article.abstract or article.body_text[:3000],
+                title=article.title,
+                keywords=list(article.keywords),
+            )
         decision = _normalize_classifier_output(raw)
         self._record_article_type(article, decision)
         return decision

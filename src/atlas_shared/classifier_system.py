@@ -7,7 +7,7 @@ import subprocess
 from typing import Any, Literal, Mapping, Protocol, Sequence
 
 from ._util import _assessment_weight, _split_terms
-from .article_types import ArticleTypeDecision, HeuristicArticleTypeClassifier
+from .article_types import ArticleTypeDecision, HeuristicArticleTypeClassifier, clean_article_type_text
 from .bundle_router import BundleRoutingResult, TopicBundleCandidate
 from .intake import PreExtractionIntakeGate, PreExtractionIntakeResult
 from .registry_sink import SupportsClassificationRegistry
@@ -493,8 +493,8 @@ class LocalPDFSurfaceExtractor:
         self,
         evidence: ClassificationEvidence,
         *,
-        max_pages: int = 4,
-        max_chars: int = 8000,
+        max_pages: int = 16,
+        max_chars: int = 30000,
     ) -> PDFSurfaceSnapshot | None:
         if not evidence.pdf_path:
             return None
@@ -514,7 +514,7 @@ class LocalPDFSurfaceExtractor:
                 check=False,
             )
             if result.returncode == 0 and result.stdout.strip():
-                text = result.stdout[:max_chars]
+                text = clean_article_type_text(result.stdout)[:max_chars]
                 mode = "pdftotext"
         except FileNotFoundError:
             pass
@@ -531,7 +531,7 @@ class LocalPDFSurfaceExtractor:
                         parts.append(page.extract_text() or "")
                         if len("\n".join(parts)) >= max_chars:
                             break
-                    text = "\n".join(parts)[:max_chars]
+                    text = clean_article_type_text("\n".join(parts))[:max_chars]
                     mode = module_name
                     if text.strip():
                         break
