@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 The format is loosely based on Keep a Changelog.
 
+## [Unreleased]
+
+### Added
+
+- Canonical home for the cross-repo science-writing norm documents, now hosted
+  in `contracts/`: `SCIENCE_COMMUNICATION_NORMS.md`, `WRITING_STYLE_GUIDE.md`,
+  `VISUALIZATION_NORMS.md`, and `EPISTEMIC_PRINCIPLES.md`. These were previously
+  duplicated across `Article_Eater_PostQuinean_v1`, `_v1_recovery`,
+  `_v1_recovery_kg`, and `AE_clean_push`. `atlas_shared` is now the single
+  source of truth; `Article_Eater_PostQuinean_v1_recovery` references them via
+  relative symlinks (`contracts/` and `docs/EPISTEMIC_PRINCIPLES.md`). The
+  `science-writer-summary` skill's contract chain resolves through the symlinks
+  unchanged.
+
 ## [0.3.0] - 2026-04-22
 
 ### Added
